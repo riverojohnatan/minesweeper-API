@@ -1,5 +1,6 @@
 package com.minesweeper.api.model;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
+@DynamoDBDocument
 public class Cell {
 
     private int x;
