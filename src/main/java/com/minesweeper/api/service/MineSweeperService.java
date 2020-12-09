@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface MineSweeperService {
 
+    MineSweeper generateMineSweeper(MineSweeperRequest request);
     MineSweeper createMineSweeper(MineSweeperRequest request);
     MineSweeper saveMineSweeper(MineSweeper mineSweeper);
     List<MineSweeper> getMinesweepersByUserId(String userId);

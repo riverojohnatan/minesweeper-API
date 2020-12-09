@@ -25,10 +25,16 @@ public class MineSweeperServiceImpl implements MineSweeperService {
     MineSweeperRepository mineSweeperRepository;
 
     @Override
-    public MineSweeper createMineSweeper(MineSweeperRequest request) {
+    public MineSweeper generateMineSweeper(MineSweeperRequest request) {
         MineSweeper mineSweeper = MineSweeper.builder().status(Status.ACTIVE).userId(request.getUserId())
                 .rows(request.getRows()).columns(request.getColumns()).bombs(request.getBombs()).build();
         mineSweeper.initCells();
+        return mineSweeper;
+    }
+
+    @Override
+    public MineSweeper createMineSweeper(MineSweeperRequest request) {
+        MineSweeper mineSweeper = this.generateMineSweeper(request);
 
         return this.saveMineSweeper(mineSweeper);
     }

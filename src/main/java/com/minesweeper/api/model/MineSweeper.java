@@ -54,6 +54,16 @@ public class MineSweeper {
     private Date lastUpdate;
 
     public void initCells() {
+        if (this.columns <= 0 || this.rows <=0 || this.bombs<=0) {
+            throw new MinesweeperApiException(
+                    "Invalid request. Columns, Rows and Bombs should be greater that 0");
+        }
+
+        if (this.columns * this.rows <= this.bombs) {
+            throw new MinesweeperApiException(
+                    "Invalid request. Amount of bombs should be less than total amount of cells");
+        }
+
         this.cells = new ArrayList<>();
         for (int i = 0; i < this.getRows(); i++) {
             for (int j = 0; j < this.getColumns(); j++) {

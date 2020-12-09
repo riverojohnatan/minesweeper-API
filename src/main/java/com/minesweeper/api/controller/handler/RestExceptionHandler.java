@@ -1,6 +1,7 @@
-package com.minesweeper.api.model.exception;
+package com.minesweeper.api.controller.handler;
 
 import com.minesweeper.api.dto.ApiError;
+import com.minesweeper.api.model.exception.MinesweeperApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -15,10 +16,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class RestExceptionHandler {
 
    @ExceptionHandler(MinesweeperApiException.class)
-    protected ResponseEntity<ApiError> handleSolicitudesApiException(final MinesweeperApiException ex) {
+    protected ResponseEntity<ApiError> handleRequestApiException(final MinesweeperApiException ex) {
         log.error(ex.getMessage());
         final ApiError apiError = ApiError.builder().message(ex.getMessage()).build();
-        return new ResponseEntity<ApiError>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<ApiError>(apiError, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
