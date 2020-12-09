@@ -38,9 +38,13 @@ public class MineSweeperServiceTest {
 
     private final String USER_ID = "AN_USER";
 
+    private final int COLUMNS = 10;
+
+    private final int ROWS = 10;
+
     @BeforeEach
     public void setup() {
-        request = MineSweeperRequest.builder().bombs(5).columns(10).rows(10).userId(USER_ID).build();
+        request = MineSweeperRequest.builder().bombs(5).columns(COLUMNS).rows(ROWS).userId(USER_ID).build();
         mineSweeper = mineSweeperService.generateMineSweeper(request);
         this.mineSweeper.setCreationTime(new Date());
     }
@@ -169,6 +173,27 @@ public class MineSweeperServiceTest {
 
         // Assertions
         assertFalse(mineSweeperService.cellAction(cellRequest, CellAction.FLAG).getCell(0,0).isFlagged());
+    }
+
+    @Test
+    void flagCellOutOfIndexThrowsMinesweeperApiException() {
+        // Prepare scenario
+        String mineSweeperId = UUID.randomUUID().toString();
+        this.mineSweeper.setId(mineSweeperId);
+        CellRequest cellRequest = CellRequest.builder().x(COLUMNS).y(ROWS).mineSweeperId(mineSweeperId).build();
+
+        // Mock responses
+        Mockito.when(mineSweeperRepository.findById(eq(mineSweeperId))).thenReturn(Optional.of(mineSweeper));
+        Mockito.when(mineSweeperRepository.save(eq(mineSweeper))).thenReturn(mineSweeper);
+
+        try {
+            mineSweeperService.cellAction(cellRequest, CellAction.FLAG);
+            // If it gets here, the test need to fail
+            fail();
+        } catch (MinesweeperApiException e) {
+            // Assertions
+            assertEquals(e.getMessage(), "Requested cell is out of index");
+        }
     }
 
 }
