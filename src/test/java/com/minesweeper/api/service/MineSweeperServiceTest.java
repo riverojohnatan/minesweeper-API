@@ -1,6 +1,8 @@
 package com.minesweeper.api.service;
 
+import com.minesweeper.api.dto.CellRequest;
 import com.minesweeper.api.dto.MineSweeperRequest;
+import com.minesweeper.api.model.CellAction;
 import com.minesweeper.api.model.MineSweeper;
 import com.minesweeper.api.model.Status;
 import com.minesweeper.api.model.exception.MinesweeperApiException;
@@ -44,11 +46,13 @@ public class MineSweeperServiceTest {
     }
 
     @Test
-    void validGameRequestSavesNewGame(){
+    void validGameRequestSavesNewGame() {
+        // Mock responses
         Mockito.when(mineSweeperRepository.save(any(MineSweeper.class))).thenReturn(this.mineSweeper);
 
         MineSweeper mineSweeper = mineSweeperService.createMineSweeper(request);
 
+        // Assertions
         assertNotNull(mineSweeper);
         assertEquals(request.getRows() * request.getColumns(), mineSweeper.getCells().size());
         assertEquals(request.getBombs(), mineSweeper.bombsAmount());
@@ -56,66 +60,115 @@ public class MineSweeperServiceTest {
     }
 
     @Test
-    void invalidGameRequestThrowsMinesweeperApiException(){
+    void invalidGameRequestThrowsMinesweeperApiException() {
+        // Prepare scenario
         MineSweeperRequest gameRequest = MineSweeperRequest.builder().bombs(999).rows(5).columns(5).build();
-
-        try{
+        try {
             mineSweeperService.createMineSweeper(gameRequest);
+            // If it gets here, the test need to fail
             fail();
         } catch (MinesweeperApiException e) {
-            assertEquals(e.getMessage(),"Invalid request. Amount of bombs should be less than total amount of cells");
+            // Assertions
+            assertEquals(e.getMessage(), "Invalid request. Amount of bombs should be less than total amount of cells");
         }
     }
 
     @Test
-    void invalidGameRequestWithZeroBombsThrowsMinesweeperApiException(){
+    void invalidGameRequestWithZeroBombsThrowsMinesweeperApiException() {
+        // Prepare scenario
         MineSweeperRequest gameRequest = MineSweeperRequest.builder().bombs(0).rows(5).columns(5).build();
-
-        try{
+        try {
             mineSweeperService.createMineSweeper(gameRequest);
+            // If it gets here, the test need to fail
             fail();
         } catch (MinesweeperApiException e) {
-            assertEquals(e.getMessage(),"Invalid request. Columns, Rows and Bombs should be greater that 0");
+            // Assertions
+            assertEquals(e.getMessage(), "Invalid request. Columns, Rows and Bombs should be greater that 0");
         }
     }
 
     @Test
-    void pauseActiveGame(){
+    void pauseActiveGame() {
+        // Prepare scenario
         String gameId = UUID.randomUUID().toString();
         this.mineSweeper.setId(gameId);
+
+        // Mock responses
         Mockito.when(mineSweeperRepository.findById(eq(gameId))).thenReturn(Optional.of(mineSweeper));
         Mockito.when(mineSweeperRepository.save(eq(mineSweeper))).thenReturn(mineSweeper);
+
         MineSweeper gamePaused = mineSweeperService.pauseResumeMineSweeper(gameId);
 
+        // Assertions
         assertEquals(gamePaused.getStatus(), Status.PAUSED);
     }
 
     @Test
-    void resumeAPausedGame(){
-        String gameId = UUID.randomUUID().toString();
-        this.mineSweeper.setId(gameId);
+    void resumeAPausedGame() {
+        // Prepare scenario
+        String mineSweeperId = UUID.randomUUID().toString();
+        this.mineSweeper.setId(mineSweeperId);
         this.mineSweeper.setStatus(Status.PAUSED);
-        Mockito.when(mineSweeperRepository.findById(eq(gameId))).thenReturn(Optional.of(mineSweeper));
-        Mockito.when(mineSweeperRepository.save(eq(mineSweeper))).thenReturn(mineSweeper);
-        MineSweeper gamePaused = mineSweeperService.pauseResumeMineSweeper(gameId);
 
+        // Mock responses
+        Mockito.when(mineSweeperRepository.findById(eq(mineSweeperId))).thenReturn(Optional.of(mineSweeper));
+        Mockito.when(mineSweeperRepository.save(eq(mineSweeper))).thenReturn(mineSweeper);
+        MineSweeper gamePaused = mineSweeperService.pauseResumeMineSweeper(mineSweeperId);
+
+        // Assertions
         assertEquals(gamePaused.getStatus(), Status.ACTIVE);
     }
 
     @Test
-    void pauseAnOverGameThrowsMinesweeperApiException(){
-        String gameId = UUID.randomUUID().toString();
-        this.mineSweeper.setId(gameId);
+    void pauseAnOverGameThrowsMinesweeperApiException() {
+        // Prepare scenario
+        String mineSweeperId = UUID.randomUUID().toString();
+        this.mineSweeper.setId(mineSweeperId);
         this.mineSweeper.setStatus(Status.GAME_OVER);
-        Mockito.when(mineSweeperRepository.findById(eq(gameId))).thenReturn(Optional.of(mineSweeper));
+
+        // Mock responses
+        Mockito.when(mineSweeperRepository.findById(eq(mineSweeperId))).thenReturn(Optional.of(mineSweeper));
         Mockito.when(mineSweeperRepository.save(eq(mineSweeper))).thenReturn(mineSweeper);
 
-        try{
-            mineSweeperService.pauseResumeMineSweeper(gameId);
+        try {
+            mineSweeperService.pauseResumeMineSweeper(mineSweeperId);
+            // If it gets here, the test need to fail
             fail();
-        } catch(MinesweeperApiException e){
-            assertEquals(e.getMessage(),"The game is over and could not be resumed/paused");
+        } catch (MinesweeperApiException e) {
+            // Assertions
+            assertEquals(e.getMessage(), "The game is over and could not be resumed/paused");
         }
+    }
+
+    @Test
+    void flagCell() {
+        // Prepare scenario
+        String mineSweeperId = UUID.randomUUID().toString();
+        this.mineSweeper.setId(mineSweeperId);
+        CellRequest cellRequest = CellRequest.builder().x(0).y(0).mineSweeperId(mineSweeperId).build();
+
+        // Mock responses
+        Mockito.when(mineSweeperRepository.findById(eq(mineSweeperId))).thenReturn(Optional.of(mineSweeper));
+        Mockito.when(mineSweeperRepository.save(eq(mineSweeper))).thenReturn(mineSweeper);
+
+        // Assertions
+        assertTrue(mineSweeperService.cellAction(cellRequest, CellAction.FLAG).getCell(0,0).isFlagged());
+    }
+
+    @Test
+    void unFlagCell() {
+        // Prepare scenario
+        String mineSweeperId = UUID.randomUUID().toString();
+        this.mineSweeper.setId(mineSweeperId);
+        this.mineSweeper.getCell(0, 0).flag();
+        CellRequest cellRequest = CellRequest.builder().x(0).y(0).mineSweeperId(mineSweeperId).build();
+
+        // Mock responses
+        Mockito.when(mineSweeperRepository.findById(eq(mineSweeperId))).thenReturn(Optional.of(mineSweeper));
+        Mockito.when(mineSweeperRepository.save(eq(mineSweeper))).thenReturn(mineSweeper);
+
+        // Assertions
+        assertFalse(mineSweeperService.cellAction(cellRequest, CellAction.FLAG).getCell(0,0).isFlagged());
     }
 
 }
