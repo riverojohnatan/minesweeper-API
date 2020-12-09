@@ -1,6 +1,5 @@
 package com.minesweeper.api.service.impl;
 
-import com.google.gson.Gson;
 import com.minesweeper.api.dto.CellRequest;
 import com.minesweeper.api.dto.MineSweeperRequest;
 import com.minesweeper.api.model.Cell;
@@ -15,13 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @Slf4j
 public class MineSweeperServiceImpl implements MineSweeperService {
 
-    private Gson gson = new Gson();
     @Autowired
     MineSweeperRepository mineSweeperRepository;
 
@@ -36,8 +35,10 @@ public class MineSweeperServiceImpl implements MineSweeperService {
 
     @Override
     public MineSweeper saveMineSweeper(MineSweeper mineSweeper) {
-        log.info("Saving minesweeper");
-        log.info(gson.toJson(mineSweeper));
+        if (!Objects.isNull(mineSweeper.getId())) {
+            log.info("Saving minesweeper with id: ".concat(mineSweeper.getId()));
+        }
+
         return this.mineSweeperRepository.save(mineSweeper);
     }
 
@@ -63,6 +64,10 @@ public class MineSweeperServiceImpl implements MineSweeperService {
     public MineSweeper cellAction(CellRequest cellRequest, CellAction action) {
 
         MineSweeper mineSweeper = this.getMineSweeperById(cellRequest.getMineSweeperId());
+        if(!mineSweeper.getStatus().equals(Status.ACTIVE)){
+            throw new MinesweeperApiException("You can't play in a non active game");
+        }
+
         Cell cell = mineSweeper.getCell(cellRequest.getX(), cellRequest.getY());
 
         switch (action) {
@@ -73,7 +78,6 @@ public class MineSweeperServiceImpl implements MineSweeperService {
                 mineSweeper.recognizeCell(cell);
                 break;
         }
-
 
         return this.saveMineSweeper(mineSweeper);
     }

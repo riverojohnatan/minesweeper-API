@@ -5,13 +5,15 @@ import com.minesweeper.api.model.exception.MinesweeperApiException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-@DynamoDBTable(tableName = "Minesweeper-Api.Games")
+@DynamoDBTable(tableName = "Minesweeper.Games")
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class MineSweeper {
 
@@ -107,6 +109,14 @@ public class MineSweeper {
         }
     }
 
+    public Integer bombsAmount() {
+        return cells.stream().map(c -> c.isBomb() ? 1 : 0).reduce(0, Integer::sum);
+    }
+
+    public Stream<Cell> getAdjacentCellsStream(Cell cell) {
+        return cells.stream().filter(c -> c.isAdjacentTo(cell));
+    }
+
     private void accumulateTimePaused() {
         Calendar initDate = Calendar.getInstance();
         initDate.setTime(this.lastUpdate != null ? this.lastUpdate : this.creationTime);
@@ -129,14 +139,6 @@ public class MineSweeper {
                         recognizeAdjacentCells(adjEmptyCell);
                     }
                 });
-    }
-
-    private Stream<Cell> getAdjacentCellsStream(Cell cell) {
-        return cells.stream().filter(c -> c.isAdjacentTo(cell));
-    }
-
-    private Integer bombsAmount() {
-        return cells.stream().map(c -> c.isBomb() ? 1 : 0).reduce(0, Integer::sum);
     }
 
 }

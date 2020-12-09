@@ -71,13 +71,22 @@ public class MainController {
         return mineSweeperService.pauseResumeMineSweeper(mineSweeperId);
     }
 
-    @PutMapping("/cell/{action}")
+    @PutMapping("/cell/flag")
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Cell's action. FLAG/CLICK", response = MineSweeper.class, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Cell's action. FLAG", response = MineSweeper.class, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Cell has been flagged/clicked successfully") })
-    public MineSweeper cellAction(@PathVariable("action") CellAction action, @RequestBody final CellRequest cellRequest){
-        log.info(action.name().concat(" cell"));
-        return mineSweeperService.cellAction(cellRequest, action);
+    public MineSweeper flagCellAction(@RequestBody final CellRequest cellRequest){
+        log.info("Flag cell");
+        return mineSweeperService.cellAction(cellRequest, CellAction.FLAG);
+    }
+
+    @PutMapping("/cell/click")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Cell's action. CLICK", response = MineSweeper.class, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Cell has been flagged/clicked successfully") })
+    public MineSweeper clickCellAction(@RequestBody final CellRequest cellRequest){
+        log.info("Click cell");
+        return mineSweeperService.cellAction(cellRequest, CellAction.CLICK);
     }
 
 }
