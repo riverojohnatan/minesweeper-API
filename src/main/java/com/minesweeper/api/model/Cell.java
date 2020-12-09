@@ -23,7 +23,10 @@ public class Cell {
 
     private boolean recognized;
 
-    public Cell() {}
+    public Cell(final int posX, final int posY) {
+        this.x = posX;
+        this.y = posY;
+    }
     
     
 	public boolean isAdjacentTo(Cell cell) {

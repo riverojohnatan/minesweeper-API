@@ -10,7 +10,7 @@ import java.util.List;
 public interface MineSweeperService {
 
     MineSweeper createMineSweeper(MineSweeperRequest request);
-    MineSweeper saveMineSweeper(MineSweeper game);
+    MineSweeper saveMineSweeper(MineSweeper mineSweeper);
     List<MineSweeper> getMinesweepersByUserId(String userId);
     MineSweeper getMineSweeperById(String mineSweeperId);
     MineSweeper pauseResumeMineSweeper(String mineSweeperId);
