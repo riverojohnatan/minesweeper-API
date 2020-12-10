@@ -51,4 +51,3 @@ prioritize when time is sufficient to solve everything.
 Please email your solution as soon as you have completed the challenge or the time is up.
 
 ## AWS Endpoint API
-http://ec2-34-229-141-233.compute-1.amazonaws.com:8080
